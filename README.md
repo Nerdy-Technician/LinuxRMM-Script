@@ -18,7 +18,7 @@ The script is designed for reliability and flexibility, supporting multiple syst
   * [🎨 Prettier `--simple` Output](#prettier-simple-output)
 * [🔄 Update the Agent](#update-the-agent)
 * [❌ Uninstall the Agent](#uninstall-the-agent)
-* [📖 Installation Wiki](https://github.com/Brandon-Roff/LinuxRMM-Script/wiki)
+* [📖 Installation Wiki](https://github.com/Nerdy-Technician/LinuxRMM-Script/wiki)
 * [📌 Credits](#credits)
 
 ---
@@ -53,7 +53,7 @@ Future support for additional platforms will be added.
 Download the script:
 
 ```bash
-wget https://raw.githubusercontent.com/Brandon-Roff/LinuxRMM-Script/refs/heads/main/rmmagent-linux.sh
+wget https://raw.githubusercontent.com/Nerdy-Technician/LinuxRMM-Script/refs/heads/main/rmmagent-linux.sh
 ```
 
 Make it executable:
@@ -62,7 +62,7 @@ Make it executable:
 sudo chmod +x rmmagent-linux.sh
 ```
 
-📖 Full installation guide available here: [Installation Wiki](https://github.com/Brandon-Roff/LinuxRMM-Script/wiki)
+📖 Full installation guide available here: [Installation Wiki](https://github.com/Nerdy-Technician/LinuxRMM-Script/wiki)
 
 ---
 
