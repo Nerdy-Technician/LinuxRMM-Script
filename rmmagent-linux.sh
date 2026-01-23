@@ -90,27 +90,31 @@ if [[ "$1" != "install" && "$1" != "update" && "$1" != "uninstall" ]]; then
 fi
 
 #--- arch detection -------------------------------------------------------------
-system=$(uname -m)
-case "$system" in
-    x86_64) system="amd64" ;;
-    i386|i686) system="x86" ;;
-    aarch64) system="arm64" ;;
-    armv6l) system="armv6" ;;
-    armv7l) system="armv6" ;;
-    *) echo "Unsupported architecture: $system"; exit 1 ;;
-esac
+
+function detect_arch() {
+    local arch
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64) echo "amd64" ;;
+        i386|i686) echo "x86" ;;
+        aarch64) echo "arm64" ;;
+        armv6l|armv7l) echo "armv6" ;;
+        *) echo "unsupported" ;;
+    esac
+}
+
 
 #--- inputs --------------------------------------------------------------------
-mesh_url=$2
-rmm_url=$3
-rmm_client_id=$4
-rmm_site_id=$5
-rmm_auth=$6
-rmm_agent_type=$7
+mesh_url="${2:-}"
+rmm_url="${3:-}"
+rmm_client_id="${4:-}"
+rmm_site_id="${5:-}"
+rmm_auth="${6:-}"
+rmm_agent_type="${7:-}"
 
 # uninstall inputs
-mesh_fqdn=$2
-mesh_id=$3
+mesh_fqdn="${2:-}"
+mesh_id="${3:-}"
 
 #--- versions / URLs -----------------------------------------------------------
 go_version="1.25.6"
@@ -125,6 +129,7 @@ mesh_arm64="&installflags=0&meshinstall=26"
 
 #--- helpers -------------------------------------------------------------------
 function go_install() {
+    system=$(detect_arch)
     if ! command -v go >/dev/null 2>&1; then
         info_echo "Installing Go $go_version for $system..."
         case "$system" in
@@ -143,6 +148,13 @@ function go_install() {
         fi
         ok_echo "Go $go_version installed."
     fi
+}
+
+function update_agent() {
+    systemctl stop tacticalagent
+    cp "/tmp/temp_rmmagent" /usr/local/bin/rmmagent
+    rm "/tmp/temp_rmmagent"
+    systemctl start tacticalagent
 }
 
 function agent_compile() {
@@ -277,7 +289,7 @@ case "$1" in
     update)
         go_install
         agent_compile
-        install_agent
+        update_agent
         ok_echo "Tactical Agent Update is done."
         ;;
     uninstall)
