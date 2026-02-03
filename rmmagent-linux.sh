@@ -13,6 +13,13 @@ if [[ "${1:-}" == "--simple" ]]; then
     shift
 fi
 
+# insecure flag for wget (self-signed certs)
+WGET_INSECURE=""
+if [[ "${WGET_INSECURE_FLAG:-}" == "true" ]]; then
+    WGET_INSECURE="--no-check-certificate"
+fi  
+
+
 # color codes
 RED="\e[31m"
 GREEN="\e[32m"
@@ -73,13 +80,25 @@ fi
 if [[ "$1" == "help" ]]; then
     cat <<'EOF'
 Help available at:
-  github.com/Brandon-Roff/LinuxRMM-Script
+  github.com/Nerdy-Technician/LinuxRMM-Script
 
 Install example:
   sudo bash rmmagent-linux.sh install \
     "https://mesh.example.com/meshagents?id=ENCODED_ID" \
     "https://rmm-api.example.com" \
     1 2 "SuperSecretAuthKey" server
+
+Install with simple output formatting:
+  sudo bash rmmagent-linux.sh --simple install \
+    "https://mesh.example.com/meshagents?id=ENCODED_ID" \
+    "https://rmm-api.example.com" \
+    1 2 "SuperSecretAuthKey" server
+
+Uninstall example:
+  sudo bash rmmagent-linux.sh uninstall "mesh.example.com" "mesh-id"
+
+Update example:
+  sudo bash rmmagent-linux.sh update
 EOF
     exit 0
 fi
@@ -194,9 +213,9 @@ function install_agent() {
             -site-id "$rmm_site_id" \
             -agent-type "$rmm_agent_type" \
             -auth "$rmm_auth"; then
-            ok_echo "Tactical Agent installed successfully."
+            ok_echo "Tactical RMM Agent installed successfully."
         else
-            err_echo "Tactical Agent failed to install. Check logs or run without --simple."
+            err_echo "Tactical RMM Agent failed to install. Check logs or run without --simple."
             exit 1
         fi
     else
@@ -230,7 +249,7 @@ EOF
 
     systemctl daemon-reload
     systemctl enable --now tacticalagent
-    ok_echo "Tactical Agent service installed and started."
+    ok_echo "Tactical RMM Agent service installed and started."
 }
 
 function install_mesh() {
@@ -250,6 +269,7 @@ function install_mesh() {
     /tmp/meshagent -install --installPath="/opt/tacticalmesh"
     ok_echo "Mesh agent installed."
 }
+
 
 function uninstall_agent() {
     info_echo "Uninstalling Tactical Agent..."
@@ -284,17 +304,17 @@ case "$1" in
         install_mesh
         agent_compile
         install_agent
-        ok_echo "Tactical Agent Install is done."
+        ok_echo "Tactical Agent Install is done. ✅ "
         ;;
     update)
         go_install
         agent_compile
         update_agent
-        ok_echo "Tactical Agent Update is done."
+        ok_echo "Tactical Agent Update is done. ✅ "
         ;;
     uninstall)
         uninstall_agent
         uninstall_mesh
-        ok_echo "Tactical Agent Uninstall is done."
+        ok_echo "Tactical Agent Uninstall is done. ✅ "
         ;;
 esac
