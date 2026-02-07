@@ -3,6 +3,9 @@
 # TacticalRMM Agent Installation & Management Script
 
 This repository contains a **one-line installation, update, and removal script** for the TacticalRMM agent on Linux systems.
+---
+:warning:This Project is in no way affiliated with the TRMM Team 
+---
 
 The script is designed for reliability and flexibility, supporting multiple system architectures and ensuring smooth deployment across different environments.
 
@@ -97,7 +100,7 @@ The script automatically detects system architecture using `uname -m` and maps i
 * `armv7l` → **armv6**
 * `armv6l` → **armv6**
 
-If the architecture is unrecognized, the script exits safely with an error message.
+If the architecture is unrecognised, the script exits safely with an error message.
 
 ---
 
@@ -226,3 +229,5 @@ This project is based on [Netvolt’s LinuxRMM-Script](https://github.com/netvol
 ---
 
 ✨ **Professional, robust, and multi-platform ready — the easiest way to manage TacticalRMM agents on Linux.**
+
+
