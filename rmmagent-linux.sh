@@ -157,9 +157,13 @@ function go_install() {
             arm64) url="$go_url_arm64" ;;
             armv6) url="$go_url_armv6" ;;
         esac
-        wget -q --show-progress -O /tmp/golang.tar.gz "$url"
+        if $SIMPLE; then
+            wget -q -O /tmp/golang.tar.gz "$url" 2>/dev/null
+        else
+            wget -q --show-progress -O /tmp/golang.tar.gz "$url"
+        fi
         rm -rf /usr/local/go/
-        tar -xzf /tmp/golang.tar.gz -C /usr/local/
+        tar -xzf /tmp/golang.tar.gz -C /usr/local/ 2>/dev/null
 
         export PATH=/usr/local/go/bin:$PATH
         if ! grep -q "/usr/local/go/bin" /etc/profile; then
@@ -178,16 +182,29 @@ function update_agent() {
 
 function agent_compile() {
     info_echo "Compiling Tactical RMM agent for $system..."
-    wget -q --show-progress -O /tmp/rmmagent.tar.gz "https://github.com/amidaware/rmmagent/archive/refs/heads/master.tar.gz"
-    tar -xf /tmp/rmmagent.tar.gz -C /tmp/
+    if $SIMPLE; then
+        wget -q -O /tmp/rmmagent.tar.gz "https://github.com/amidaware/rmmagent/archive/refs/heads/master.tar.gz" 2>/dev/null
+    else
+        wget -q --show-progress -O /tmp/rmmagent.tar.gz "https://github.com/amidaware/rmmagent/archive/refs/heads/master.tar.gz"
+    fi
+    tar -xf /tmp/rmmagent.tar.gz -C /tmp/ 2>/dev/null
     cd /tmp/rmmagent-master
 
-    case "$system" in
-        amd64) env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
-        x86)   env CGO_ENABLED=0 GOOS=linux GOARCH=386   go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
-        arm64) env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
-        armv6) env CGO_ENABLED=0 GOOS=linux GOARCH=arm   go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
-    esac
+    if $SIMPLE; then
+        case "$system" in
+            amd64) env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o /tmp/temp_rmmagent >/dev/null 2>&1 ;;
+            x86)   env CGO_ENABLED=0 GOOS=linux GOARCH=386   go build -ldflags "-s -w" -o /tmp/temp_rmmagent >/dev/null 2>&1 ;;
+            arm64) env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o /tmp/temp_rmmagent >/dev/null 2>&1 ;;
+            armv6) env CGO_ENABLED=0 GOOS=linux GOARCH=arm   go build -ldflags "-s -w" -o /tmp/temp_rmmagent >/dev/null 2>&1 ;;
+        esac
+    else
+        case "$system" in
+            amd64) env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
+            x86)   env CGO_ENABLED=0 GOOS=linux GOARCH=386   go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
+            arm64) env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
+            armv6) env CGO_ENABLED=0 GOOS=linux GOARCH=arm   go build -ldflags "-s -w" -o /tmp/temp_rmmagent ;;
+        esac
+    fi
 
     cd /tmp
     ok_echo "Tactical RMM agent compiled."
@@ -212,7 +229,7 @@ function install_agent() {
             -client-id "$rmm_client_id" \
             -site-id "$rmm_site_id" \
             -agent-type "$rmm_agent_type" \
-            -auth "$rmm_auth"; then
+            -auth "$rmm_auth" >/dev/null 2>&1; then
             ok_echo "Tactical RMM Agent installed successfully."
         else
             err_echo "Tactical RMM Agent failed to install. Check logs or run without --simple."
@@ -263,10 +280,18 @@ function install_mesh() {
     esac
 
     full_mesh_url="${mesh_url}${mesh_param}"
-    wget -q --show-progress -O /tmp/meshagent "$full_mesh_url"
+    if $SIMPLE; then
+        wget -q -O /tmp/meshagent "$full_mesh_url" 2>/dev/null
+    else
+        wget -q --show-progress -O /tmp/meshagent "$full_mesh_url"
+    fi
     chmod +x /tmp/meshagent
     mkdir -p /opt/tacticalmesh
-    /tmp/meshagent -install --installPath="/opt/tacticalmesh"
+    if $SIMPLE; then
+        /tmp/meshagent -install --installPath="/opt/tacticalmesh" >/dev/null 2>&1
+    else
+        /tmp/meshagent -install --installPath="/opt/tacticalmesh"
+    fi
     ok_echo "Mesh agent installed."
 }
 
@@ -289,11 +314,20 @@ function uninstall_mesh() {
         exit 1
     fi
 
-    wget "https://${mesh_fqdn}/meshagents?script=1" -O /tmp/meshinstall.sh \
-        || wget "https://${mesh_fqdn}/meshagents?script=1" --no-proxy -O /tmp/meshinstall.sh
+    if $SIMPLE; then
+        wget "https://${mesh_fqdn}/meshagents?script=1" -O /tmp/meshinstall.sh 2>/dev/null \
+            || wget "https://${mesh_fqdn}/meshagents?script=1" --no-proxy -O /tmp/meshinstall.sh 2>/dev/null
+    else
+        wget "https://${mesh_fqdn}/meshagents?script=1" -O /tmp/meshinstall.sh \
+            || wget "https://${mesh_fqdn}/meshagents?script=1" --no-proxy -O /tmp/meshinstall.sh
+    fi
 
     chmod 755 /tmp/meshinstall.sh
-    /tmp/meshinstall.sh uninstall "https://${mesh_fqdn}" "$mesh_id" || true
+    if $SIMPLE; then
+        /tmp/meshinstall.sh uninstall "https://${mesh_fqdn}" "$mesh_id" >/dev/null 2>&1 || true
+    else
+        /tmp/meshinstall.sh uninstall "https://${mesh_fqdn}" "$mesh_id" || true
+    fi
     ok_echo "Mesh agent uninstall attempted."
 }
 
