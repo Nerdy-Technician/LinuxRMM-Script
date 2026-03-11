@@ -136,7 +136,7 @@ mesh_fqdn="${2:-}"
 mesh_id="${3:-}"
 
 #--- versions / URLs -----------------------------------------------------------
-go_version="1.25.6"
+go_version="1.26.1"
 go_url_amd64="https://go.dev/dl/go${go_version}.linux-amd64.tar.gz"
 go_url_x86="https://go.dev/dl/go${go_version}.linux-386.tar.gz"
 go_url_arm64="https://go.dev/dl/go${go_version}.linux-arm64.tar.gz"
